@@ -1,0 +1,33 @@
+# Render Blueprint for hosted Alex. New > Blueprint > pick this repo.
+# The three secrets marked sync: false are asked for once, in the Render dashboard.
+services:
+  - type: web
+    name: alexreview-ai
+    runtime: docker
+    plan: standard
+    region: oregon
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: ALEX_APP_ID
+        value: "5263028"
+      - key: ALEX_ALLOWED_ACCOUNTS
+        value: niihhhall
+      - key: ALEX_APP_PRIVATE_KEY
+        sync: false
+      - key: ALEX_WEBHOOK_SECRET
+        sync: false
+      - key: ALEX_LLM_API_KEY
+        sync: false
+      - key: ALEX_LLM_URL
+        value: https://api.fireworks.ai/inference/v1
+      - key: ALEX_MODEL
+        value: accounts/fireworks/models/deepseek-v4p1-flash
+      - key: ALEX_TOKEN_BUDGET
+        value: "1500000"
+      - key: ALEX_MONTHLY_TOKEN_BUDGET
+        value: "200000000"
+      - key: ALEX_WORKERS
+        value: "2"
+      - key: ALEX_REVIEW_ON_PUSH
+        value: "false"

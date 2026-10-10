@@ -7,6 +7,10 @@ inclusion: always
 - Never use em dashes (—) or en dashes (–) anywhere: chat replies, code comments, PR comments, commit messages, docs, or generated review output. Use a comma, colon, period, parentheses, or a plain hyphen (-) instead.
 - When generating PR review comments or posting them to GitHub, scan the text and replace any em or en dash before posting.
 
+# Reminders
+
+- Do not remind the user to rotate or revoke the Fireworks API key. They will handle it themselves.
+
 # Code reviewer naming
 
 - The project's AI code reviewer is called **Alex**. Always present review output as "Alex".

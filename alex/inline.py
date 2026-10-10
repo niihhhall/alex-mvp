@@ -24,10 +24,12 @@ def review_comment(f: Finding) -> dict:
     return payload
 
 
-def existing_fingerprints(comments: List[dict]) -> dict:
-    """fingerprint -> html_url for Alex comments already on the PR."""
+def existing_fingerprints(comments: List[dict], bot_login: str = "") -> dict:
+    """fingerprint -> html_url for Alex comments already on the PR (only this bot's, when given)."""
     found = {}
     for c in comments:
+        if bot_login and (c.get("user") or {}).get("login") != bot_login:
+            continue
         m = FINDING_MARKER.search(c.get("body") or "")
         if m:
             found[m.group(1)] = c.get("html_url", "")
