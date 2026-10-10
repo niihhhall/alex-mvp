@@ -120,6 +120,34 @@ class MermaidTests(unittest.TestCase):
     def test_rejects_wrong_header(self):
         self.assertIsNone(mermaid.validate("sequence", "flowchart TD\n A --> B"))
 
+    def test_real_case1_flowchart_passes(self):
+        src = '''flowchart TD
+  A["Webhook message arrives"] --> B["Get last_msg_id from Redis"]
+  B --> C{"Value present?"}
+  C -->|"No"| D["Skip read receipt"]
+  C -->|"Yes"| E["Call decode on str value"]
+  E --> F["AttributeError raised"]
+  F --> G["Outer except aborts processing"]
+  G --> H["No blue ticks, no reply"]'''
+        self.assertIsNotNone(mermaid.validate("flowchart", src))
+
+    def test_flowchart_rejects_bad_lines(self):
+        for bad in ('A -- text --> B', 'A ==> B ==', 'A["ok"] --> B["x"] extra words', 'style A fill:#f00',
+                    'A["quote " inside"] --> B'):
+            self.assertIsNone(mermaid.validate("flowchart", f"flowchart TD\n  {bad}"), bad)
+
+    def test_sequence_rules(self):
+        good = "sequenceDiagram\n  participant W as Webhook\n  W->>R: get last_msg_id\n  R-->>W: str\n  Note over W: decode fails\n  alt has id\n  W->>W: decode\n  end"
+        self.assertIsNotNone(mermaid.validate("sequence", good))
+        self.assertIsNone(mermaid.validate("sequence", "sequenceDiagram\n  W->>R get id"))
+        self.assertIsNone(mermaid.validate("sequence", "sequenceDiagram\n  W=>R: x"))
+
+    def test_er_and_class(self):
+        self.assertIsNotNone(mermaid.validate("er", 'erDiagram\n  LEAD ||--o{ BOOKING : has\n  BOOKING {\n  string calendly_event_id UK\n  }'))
+        self.assertIsNotNone(mermaid.validate("class", "classDiagram\n  Router <|-- CloudRouter\n  Router : +send()"))
+        self.assertIsNone(mermaid.validate("er", "erDiagram\n  LEAD -> BOOKING"))
+        self.assertIsNone(mermaid.validate("er", "erDiagram\n  BOOKING {\n  string id"))
+
     def test_strips_fences(self):
         out = mermaid.validate("sequence", "```mermaid\nsequenceDiagram\n  A->>B: hi\n```")
         self.assertEqual(out, "sequenceDiagram\n  A->>B: hi")

@@ -45,11 +45,11 @@ Order, top to bottom:
 3. Verdict: one sentence of merge advice
 4. **Findings**: numbered, badge + short title + link to the inline comment + `path:line`.
    Findings Alex could not place on a diff line appear here with "not on a changed line".
-5. **Summary**: up to 4 bullets on what changed and why it matters
+5. **Summary**: 2 or 3 bullets (max 18 words each) on what the PR changes. Never restates the findings.
 6. **Files changed** (collapsed): table of file, change, issues
 7. **Diagram** (open): one Mermaid diagram, type chosen by the change
 8. **Why this score** (collapsed): one or two sentences
-9. Footer: `Reviews (N) · Last reviewed commit: sha message · Comment /alex to re-run`
+9. Footer: `Reviews (N) · Last reviewed commit: sha message · Pushed fixes? Comment /alex to review again`
 
 Hidden markers: `<!-- alex-summary -->` identifies the card; `<!-- alex-meta:{...} -->` stores the review count.
 
@@ -82,8 +82,10 @@ replacement lines
 | none | docs, config, renames, trivial changes |
 
 Rules: at most 12 nodes, labels are short plain words, every flowchart label is quoted (`A["label"]`).
-Alex validates diagrams before posting and drops a diagram rather than post a broken one.
-Phase 2 adds a real render check.
+Alex checks every diagram line against an allowed grammar (`alex/mermaid.py`: node shapes, arrows, edge
+labels, sequence messages and notes, ER relations and blocks, class relations and members) and drops the
+diagram rather than post a broken one. Dropped diagrams are logged with their source so the grammar or
+prompt can be improved.
 
 ## Reactions
 

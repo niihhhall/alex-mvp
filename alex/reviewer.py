@@ -90,6 +90,8 @@ def build_card(s: Settings, title: str, body: str, diff_text: str, findings: Lis
             log(f"card: model call failed ({err}), using fallback card")
     card = cardmod.normalize(raw, findings)
     cardmod.apply_titles(card, findings)
+    if card.diagram_rejected:
+        log("card: diagram dropped by the validator: " + card.diagram_rejected.replace("\n", " | "))
     return card
 
 

@@ -19,8 +19,8 @@ Reply with ONE JSON object, no prose, with exactly these keys:
 {
   "impact": "Low" | "Medium" | "High",
   "headline": "what the PR does, one line, max 14 words",
-  "verdict": "one sentence of merge advice that mentions the most important finding, if any",
-  "summary": ["up to 4 short bullets on what changed and why it matters"],
+  "verdict": "one sentence, max 25 words: merge advice naming the most important finding, if any",
+  "summary": ["2 or 3 bullets, max 18 words each, describing WHAT THE PR CHANGES"],
   "files": {"<path>": "what changed in this file, max 8 words"},
   "titles": {"<finding number>": "short title, sentence case, max 8 words, says what breaks"},
   "score": 0-5,
@@ -30,6 +30,9 @@ Reply with ONE JSON object, no prose, with exactly these keys:
 
 Rules:
 - Plain direct English. Never use em dashes or en dashes. No hype.
+- summary describes the change itself (new behaviour, moved logic, new config). It must NOT restate,
+  explain or hint at the findings: findings are already listed above it and in the verdict.
+- Wrap code identifiers in backticks, like `last_msg_id`.
 - impact: High if the change touches money, auth, data integrity or the main user path; Low for docs, tests, small refactors.
 - score: 5 merge, 4 small fixes, 3 address feedback first, 2 needs rework, 0-1 rethink.
 - diagram: choose sequence for calls between services or APIs, er for schema changes, class for class hierarchies,
@@ -52,6 +55,7 @@ class CardData:
     score_reason: str = ""
     diagram_type: str = "none"
     diagram: Optional[str] = None
+    diagram_rejected: str = ""
     from_model: bool = False
 
 
@@ -87,7 +91,7 @@ def normalize(raw: Optional[dict], findings: List[Finding]) -> CardData:
     data.headline = _s(raw.get("headline"), 160) or "Changes reviewed."
     data.verdict = _s(raw.get("verdict"), 300) or _default_verdict(findings)
     summary = raw.get("summary") if isinstance(raw.get("summary"), list) else []
-    data.summary = [_s(b, 240) for b in summary if str(b).strip()][:4]
+    data.summary = [_s(b, 200) for b in summary if str(b).strip()][:3]
     files = raw.get("files") if isinstance(raw.get("files"), dict) else {}
     data.files = {str(k): _s(v, 80) for k, v in files.items()}
     titles = raw.get("titles") if isinstance(raw.get("titles"), dict) else {}
@@ -101,9 +105,12 @@ def normalize(raw: Optional[dict], findings: List[Finding]) -> CardData:
     diagram = raw.get("diagram") if isinstance(raw.get("diagram"), dict) else {}
     kind = str(diagram.get("type", "none")).strip().lower()
     if kind != "none":
-        cleaned = mermaid.validate(kind, str(diagram.get("mermaid", "")))
+        source = str(diagram.get("mermaid", ""))
+        cleaned = mermaid.validate(kind, source)
         if cleaned:
             data.diagram_type, data.diagram = kind, cleaned
+        else:
+            data.diagram_rejected = f"{kind}: {source[:1500]}"
     return data
 
 
@@ -199,6 +206,7 @@ def render(card: CardData, findings: List[Finding], *, diff_text: str, review_co
 
     short = head_message.splitlines()[0][:60] if head_message else ""
     commit = f"[{head_sha[:7]} {short}]({commit_url})" if commit_url else head_sha[:7]
-    out.append(f"<sub>Reviews ({review_count}) \u00b7 Last reviewed commit: {commit} \u00b7 Comment `/alex` to re-run</sub>")
+    out.append(f"<sub>Reviews ({review_count}) \u00b7 Last reviewed commit: {commit} \u00b7 "
+               f"Pushed fixes? Comment `/alex` to review again</sub>")
     out.append(f"{META_PREFIX} {json.dumps({'reviews': review_count, 'head': head_sha})} -->")
     return text.clean("\n".join(out))
