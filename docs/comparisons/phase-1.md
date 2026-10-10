@@ -33,6 +33,14 @@ Alex run: https://github.com/niihhhall/mark-ai-review-lab/actions/runs/380484977
   on the main path, which matches our P0 definition ("crash on a main path"). We keep this.
 - Greptile's summary is tighter. Alex's 4 bullets repeat the finding.
 
+## Phase 2 progress
+
+- Gap 1 fixed: summary is 2 or 3 bullets about the change and no longer repeats the finding (live on lab PR #2, review 5).
+- Gap 2 fixed: Alex posts as `alexreview-ai[bot]` from Render; reviews new PRs automatically and on `/alex`.
+- Gap 3 partly: footer now says "Pushed fixes? Comment `/alex` to review again". A one-click button needs a web page (later).
+- Gap 4 fixed: every diagram line is checked against an allowed grammar; a missing diagram gets one retry;
+  dropped diagrams are logged with their source.
+
 ## Gaps to close in phase 2
 
 1. Summary: 2 or 3 bullets about what the PR does; do not restate the finding (prompt change).
