@@ -48,9 +48,18 @@ so it is safe on untrusted changes.
 
 ## Add Alex to a repo
 
+Alex runs as the **`alexreview-ai`** GitHub App, hosted on Render ([deploy guide](docs/deploy-render.md)).
+
+1. GitHub **Settings → Applications → alexreview-ai → Configure**.
+2. Tick the repo and **Save**. No files or secrets go into the repo.
+3. Open a pull request. Alex reacts 👀, reviews, then 👍, posting as `alexreview-ai[bot]`.
+
+<details>
+<summary><b>Alternative: run Alex as a GitHub Action instead</b></summary>
+
 1. Copy [`examples/workflows/alex-review.yml`](examples/workflows/alex-review.yml) to `.github/workflows/alex-review.yml`.
 2. Add the repo secret **`ALEX_LLM_API_KEY`**: any OpenAI-compatible key. The default endpoint is Fireworks.
-3. Open a pull request. Alex reacts 👀, reviews, then 👍.
+</details>
 
 | Command | What it does |
 |---|---|

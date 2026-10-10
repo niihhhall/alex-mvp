@@ -21,7 +21,7 @@ one-click fixes, automatic and on-demand triggers, per-repo config, learning, an
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Triggers (open + `/alex`), summary card, inline comments, safety gate, status check | done (lab PR #1, see docs/comparisons/phase-1.md) |
-| 2 | GitHub App `alexreview-ai` (no org), Render hosting (install by ticking repos), security locks, phase 1 gaps (shorter summary, re-run link, diagram check), review tiers, `.alex/` config, questions, rerun lab cases 2-8 vs Greptile | planned |
+| 2 | GitHub App `alexreview-ai` (no org), Render hosting (install by ticking repos), security locks, phase 1 gaps (shorter summary, re-run link, diagram check), review tiers, `.alex/` config, questions, rerun lab cases 2-8 vs Greptile | in progress: app + Render hosting + locks are LIVE (lab PRs #2, #3); rest to do |
 | 3 | Security scan, auto-approve, related-repo context, `files.json` docs | planned |
 | 4 | Learning from reactions/replies, analytics, CLI | planned |
 | 5 | TREX-lite (run tests), codebase index, hosted app (no workflow file) | optional |
@@ -52,6 +52,18 @@ Update this table whenever a phase starts or finishes.
   Same model as Greptile's auto-approve, plus the outsider rule Greptile leaves to the user.
 - Alex only reads PR code, never runs it. Only OWNER/MEMBER/COLLABORATOR can trigger it.
 - Greptile's free Starter plan covers unlimited repos (50 credits/month, 1 developer). We used it for comparison.
+
+## Live deployment
+
+- GitHub App: `alexreview-ai`, App ID 5263028, installed only on account niihhhall ("Only on this account").
+- Render: workspace Markeye (`tea-da39cv3ncjis73c2nfog`), service `alexreview-ai` (`srv-db53v2vlot8c73dku04g`),
+  Docker, Standard plan, Oregon, auto-deploys from `main` of niihhhall/alex-mvp. URL https://alexreview-ai.onrender.com
+  (health `/healthz`, webhook `/webhook`).
+- Local secrets (never commit): `workspace/secrets/` holds the app `.pem`, `webhook-secret.txt`, `render-api-key.txt`.
+- Helpers: `scripts/render_api.py` (Render API), `scripts/render_deploy.py env` (push env vars),
+  `scripts/set_app_webhook.py <url>` (point the app at a URL), `scripts/run-once.ps1` (review a PR from this PC),
+  `scripts/smoke-server.py` (signature checks).
+- Adding a repo: GitHub Settings > Applications > alexreview-ai > Configure > tick the repo.
 
 ## Places
 
