@@ -1,0 +1,39 @@
+# Copy to .github/workflows/alex-review.yml in any repo you want Alex to review.
+# Secret needed: ALEX_LLM_API_KEY (Settings > Secrets and variables > Actions).
+# Optional bot identity: ALEX_APP_ID (variable) and ALEX_APP_PRIVATE_KEY (secret).
+name: Alex review
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+
+concurrency:
+  group: alex-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      (github.event_name == 'pull_request_target'
+        && !github.event.pull_request.draft
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.pull_request.author_association))
+      || (github.event_name == 'issue_comment'
+        && github.event.issue.pull_request
+        && startsWith(github.event.comment.body, '/alex')
+        && contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: niihhhall/alex-mvp@main
+        with:
+          llm_api_key: ${{ secrets.ALEX_LLM_API_KEY }}
+          app_id: ${{ vars.ALEX_APP_ID }}
+          app_private_key: ${{ secrets.ALEX_APP_PRIVATE_KEY }}

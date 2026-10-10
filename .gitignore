@@ -1,0 +1,20 @@
+# Secrets
+.env
+*.env
+.env.*
+!.env.example
+
+# Local only: private product code, lab snapshots, previews, demos
+workspace/
+
+# Third-party clones (pinned and installed at runtime, never committed)
+vendor/
+evals/aacr/aacr-bench/
+evals/aacr/data/
+evals/aacr/commit_check_cache.json
+evals/**/*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/

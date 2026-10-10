@@ -1,0 +1,119 @@
+name: Alex review
+description: AI pull request review with a summary card, confidence score, diagram and inline fixes.
+author: niihhhall
+branding:
+  icon: eye
+  color: green
+
+inputs:
+  llm_api_key:
+    description: API key for the OpenAI-compatible model endpoint (store as a secret).
+    required: true
+  llm_url:
+    description: OpenAI-compatible base URL.
+    required: false
+    default: https://api.fireworks.ai/inference/v1
+  model:
+    description: Model that finds issues.
+    required: false
+    default: accounts/fireworks/models/deepseek-v4p1-flash
+  card_model:
+    description: Model that writes the summary card. Defaults to `model`.
+    required: false
+    default: ''
+  github_token:
+    description: Token used to post. Ignored when app_id and app_private_key are set.
+    required: false
+    default: ${{ github.token }}
+  app_id:
+    description: Optional GitHub App id, so comments come from your Alex bot.
+    required: false
+    default: ''
+  app_private_key:
+    description: Optional GitHub App private key (secret).
+    required: false
+    default: ''
+  token_budget:
+    description: Max tokens the engine may spend on one review. 0 = unlimited.
+    required: false
+    default: '1500000'
+  timeout_minutes:
+    description: Engine timeout per review.
+    required: false
+    default: '20'
+  fail_on_p0:
+    description: Set the Alex review status to failure when a P0 finding is open.
+    required: false
+    default: 'true'
+  engine_version:
+    description: Pinned engine version, so engine releases cannot change reviews silently.
+    required: false
+    default: '1.12.10'
+
+runs:
+  using: composite
+  steps:
+    - name: Bot token
+      id: app
+      if: inputs.app_id != '' && inputs.app_private_key != ''
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.app_id }}
+        private-key: ${{ inputs.app_private_key }}
+
+    - name: Resolve pull request
+      id: pr
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+      run: |
+        set -euo pipefail
+        json=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")
+        echo "number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+        echo "base_ref=$(jq -r .base.ref <<<"$json")" >> "$GITHUB_OUTPUT"
+
+    # Trusted checkout: the base branch only. PR code is fetched as git objects and read, never executed.
+    - name: Checkout base
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.pr.outputs.base_ref }}
+        fetch-depth: 0
+
+    - name: Fetch pull request head
+      shell: bash
+      env:
+        PR_NUMBER: ${{ steps.pr.outputs.number }}
+      run: git fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/alex/head"
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Install engine
+      shell: bash
+      run: npm install -g "@alibaba-group/open-code-review@${{ inputs.engine_version }}" --no-fund --no-audit
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Review
+      shell: bash
+      env:
+        PYTHONPATH: ${{ github.action_path }}
+        ALEX_GITHUB_TOKEN: ${{ steps.app.outputs.token || inputs.github_token }}
+        ALEX_PR_NUMBER: ${{ steps.pr.outputs.number }}
+        ALEX_LLM_URL: ${{ inputs.llm_url }}
+        ALEX_LLM_KEY: ${{ inputs.llm_api_key }}
+        ALEX_MODEL: ${{ inputs.model }}
+        ALEX_CARD_MODEL: ${{ inputs.card_model }}
+        ALEX_TOKEN_BUDGET: ${{ inputs.token_budget }}
+        ALEX_TIMEOUT_MINUTES: ${{ inputs.timeout_minutes }}
+        ALEX_FAIL_ON_P0: ${{ inputs.fail_on_p0 }}
+        ALEX_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        OCR_LLM_URL: ${{ inputs.llm_url }}
+        OCR_LLM_TOKEN: ${{ inputs.llm_api_key }}
+        OCR_LLM_MODEL: ${{ inputs.model }}
+        OCR_USE_ANTHROPIC: 'false'
+      run: python -m alex.main review

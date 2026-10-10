@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="560" viewBox="0 0 880 560" role="img" aria-label="Example Alex review card">
+  <defs>
+    <linearGradient id="mark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#34D399"/><stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .t { font-family: Inter, Segoe UI, Helvetica, Arial, sans-serif; }
+    .m { font-family: JetBrains Mono, Consolas, Menlo, monospace; }
+  </style>
+  <rect width="880" height="560" rx="18" fill="#0D1117" stroke="#30363D"/>
+
+  <!-- comment header -->
+  <g transform="translate(24 22)">
+    <rect width="36" height="36" rx="10" fill="#0B1220" stroke="#1F2A44"/>
+    <path d="M18 7 L27 28 H23.2 L21.2 23.1 H14.8 L12.8 28 H9 Z M16.1 20 H19.9 L18 15 Z" fill-rule="evenodd" fill="url(#mark)"/>
+    <text x="48" y="16" class="t" font-size="14" font-weight="700" fill="#E6EDF3">alex-review<tspan fill="#8B949E" font-weight="400">  bot  commented now</tspan></text>
+    <text x="48" y="34" class="t" font-size="12" fill="#8B949E">Mark incoming messages as read (blue ticks)  #1</text>
+  </g>
+  <rect x="24" y="72" width="832" height="1" fill="#30363D"/>
+
+  <!-- title -->
+  <text x="40" y="112" class="t" font-size="24" font-weight="700" fill="#E6EDF3">Alex review  ·  Confidence 2/5</text>
+  <g transform="translate(450 96)">
+    <circle cx="8" cy="8" r="8" fill="#34D399"/><circle cx="30" cy="8" r="8" fill="#34D399"/>
+    <circle cx="52" cy="8" r="8" fill="none" stroke="#484F58" stroke-width="2"/>
+    <circle cx="74" cy="8" r="8" fill="none" stroke="#484F58" stroke-width="2"/>
+    <circle cx="96" cy="8" r="8" fill="none" stroke="#484F58" stroke-width="2"/>
+  </g>
+  <text x="40" y="146" class="t" font-size="15" fill="#E6EDF3"><tspan font-weight="700">[High impact]</tspan> Mark incoming WhatsApp messages as read before generating replies</text>
+  <text x="40" y="172" class="t" font-size="15" fill="#8B949E">Do not merge until the P0 is fixed: the decode error is swallowed and stops every reply.</text>
+
+  <!-- findings -->
+  <text x="40" y="214" class="t" font-size="17" font-weight="700" fill="#E6EDF3">Findings</text>
+  <g transform="translate(40 228)">
+    <rect width="800" height="44" rx="10" fill="#161B22" stroke="#30363D"/>
+    <rect x="14" y="11" width="38" height="22" rx="6" fill="#4B1113"/>
+    <text x="33" y="27" text-anchor="middle" class="t" font-size="12" font-weight="700" fill="#FF7B72">P0</text>
+    <text x="66" y="27" class="t" font-size="14" font-weight="600" fill="#E6EDF3">Decode on str aborts all message processing</text>
+    <text x="786" y="27" text-anchor="end" class="m" font-size="12" fill="#58A6FF">app/webhook.py:267</text>
+  </g>
+
+  <!-- diagram -->
+  <text x="40" y="314" class="t" font-size="17" font-weight="700" fill="#E6EDF3">Diagram</text>
+  <g class="t" font-size="12" fill="#E6EDF3" transform="translate(40 330)">
+    <g stroke="#30363D" fill="#161B22">
+      <rect x="0" y="0" width="150" height="46" rx="10"/><rect x="186" y="0" width="150" height="46" rx="10"/>
+      <rect x="372" y="0" width="150" height="46" rx="10"/>
+      <rect x="558" y="0" width="242" height="46" rx="10" stroke="#F85149"/>
+    </g>
+    <g stroke="#58A6FF" stroke-width="2" fill="none"><path d="M150 23H180M336 23H366M522 23H552"/></g>
+    <g fill="#58A6FF"><path d="M180 18L188 23L180 28Z"/><path d="M366 18L374 23L366 28Z"/><path d="M552 18L560 23L552 28Z"/></g>
+    <text x="75" y="28" text-anchor="middle">Incoming message</text>
+    <text x="261" y="28" text-anchor="middle">Read ID from Redis</text>
+    <text x="447" y="28" text-anchor="middle">.decode() on str</text>
+    <text x="679" y="28" text-anchor="middle" fill="#FF7B72">AttributeError, no reply sent</text>
+  </g>
+
+  <!-- inline suggestion -->
+  <text x="40" y="426" class="t" font-size="17" font-weight="700" fill="#E6EDF3">Suggested change</text>
+  <g transform="translate(40 440)">
+    <rect width="800" height="64" rx="10" fill="#161B22" stroke="#30363D"/>
+    <rect x="1" y="1" width="798" height="31" rx="9" fill="#2D1215"/>
+    <text x="16" y="22" class="m" font-size="13" fill="#FFA198">- last_msg_id = last_msg_id_bytes.decode('utf-8') if last_msg_id_bytes else ""</text>
+    <rect x="1" y="32" width="798" height="31" rx="9" fill="#0F2A1C"/>
+    <text x="16" y="53" class="m" font-size="13" fill="#7EE787">+ last_msg_id = last_msg_id_bytes or ""</text>
+  </g>
+
+  <text x="40" y="536" class="t" font-size="12" fill="#8B949E">Reviews (1)  ·  Last reviewed commit 2911559  ·  Comment /alex to re-run</text>
+</svg>
