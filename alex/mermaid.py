@@ -19,7 +19,9 @@ _SHAPE = (rf"(?:\[\[{_LABEL}\]\]|\(\({_LABEL}\)\)|\(\[{_LABEL}\]\)|\[\({_LABEL}\
 _NODE = rf"[A-Za-z][A-Za-z0-9_]*(?:{_SHAPE})?"
 _ARROW = r"(?:-->|---|-\.->|-\.-|==>|===|--x|--o|<-->)"
 _EDGE_LABEL = rf"(?:\|{_LABEL}\|)?"
-_FLOW_LINE = re.compile(rf"^{_NODE}(?:\s*{_ARROW}\s*{_EDGE_LABEL}\s*{_NODE})*\s*;?$")
+_INLINE_EDGE = r'(?:--\s*"[^"\n]*"\s*-->|==\s*"[^"\n]*"\s*==>|-\.\s*"[^"\n]*"\s*\.->)'
+_EDGE = rf"(?:{_ARROW}\s*{_EDGE_LABEL}|{_INLINE_EDGE})"
+_FLOW_LINE = re.compile(rf"^{_NODE}(?:\s*{_EDGE}\s*{_NODE})*\s*;?$")
 _FLOW_OTHER = re.compile(r'^(subgraph\s+[A-Za-z0-9_]+(?:\s*\["[^"\n]*"\])?|end|direction\s+(TD|TB|BT|LR|RL))$')
 
 # Sequence --------------------------------------------------------------------------

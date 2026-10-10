@@ -131,7 +131,23 @@ class MermaidTests(unittest.TestCase):
   G --> H["No blue ticks, no reply"]'''
         self.assertIsNotNone(mermaid.validate("flowchart", src))
 
+    def test_real_dropped_diagram_now_passes(self):
+        src = '''flowchart TD
+  A["Incoming webhook message"] --> B["_process_with_interrupt_protection"]
+  B --> C["redis.get last_msg_id:phone"]
+  C --> D{"Value returned?"}
+  D -- "str, decode_responses=True" --> E["Call .decode('utf-8') on str"]
+  D -- "None" --> F["last_msg_id = empty string"]
+  E --> G["AttributeError: str has no attribute decode"]
+  G --> H["Outer except Exception swallows error"]
+  H --> I["Abort before set_generating and process_conversation"]
+  I --> J["No reply sent, no blue ticks"]
+  F --> K["Continue to mark as read"]'''
+        self.assertIsNotNone(mermaid.validate("flowchart", src))
+
     def test_flowchart_rejects_bad_lines(self):
+        ok = 'flowchart TD\n  D -- "str, decode_responses=True" --> E["Call .decode(\'utf-8\') on str"]'
+        self.assertIsNotNone(mermaid.validate("flowchart", ok))
         for bad in ('A -- text --> B', 'A ==> B ==', 'A["ok"] --> B["x"] extra words', 'style A fill:#f00',
                     'A["quote " inside"] --> B'):
             self.assertIsNone(mermaid.validate("flowchart", f"flowchart TD\n  {bad}"), bad)
@@ -165,6 +181,16 @@ class CardTests(unittest.TestCase):
         self.assertEqual((card.impact, card.score, card.diagram_type), ("High", 2, "flowchart"))
         cardmod.apply_titles(card, self.findings)
         self.assertEqual(self.findings[0].title, "Replies stop for every user")
+
+    def test_apply_diagram(self):
+        card = cardmod.normalize(None, self.findings)
+        self.assertTrue(cardmod.apply_diagram(card, {"type": "flowchart", "mermaid": 'flowchart TD\n A["a"] --> B["b"]'}))
+        self.assertEqual(card.diagram_type, "flowchart")
+        broken = cardmod.normalize(None, self.findings)
+        self.assertFalse(cardmod.apply_diagram(broken, {"type": "flowchart", "mermaid": "flowchart TD\n A -- x --> B"}))
+        self.assertIsNone(broken.diagram)
+        self.assertTrue(broken.diagram_rejected.startswith("flowchart"))
+        self.assertFalse(cardmod.apply_diagram(broken, None))
 
     def test_fallback_card(self):
         card = cardmod.normalize(None, self.findings)

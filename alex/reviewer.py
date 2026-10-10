@@ -90,7 +90,15 @@ def build_card(s: Settings, title: str, body: str, diff_text: str, findings: Lis
             log(f"card: model call failed ({err}), using fallback card")
     card = cardmod.normalize(raw, findings)
     cardmod.apply_titles(card, findings)
-    if card.diagram_rejected:
+    if findings and not card.diagram and s.llm_key and model:
+        try:
+            resp = llm.chat(cardmod.build_diagram_messages(title, diff_text, findings),
+                            url=s.llm_url, api_key=s.llm_key, model=model, max_tokens=1500)
+            if cardmod.apply_diagram(card, llm.parse_json(resp["content"])):
+                log(f"card: diagram added on retry ({card.diagram_type})")
+        except llm.LLMError as err:
+            log(f"card: diagram retry failed ({err})")
+    if card.diagram_rejected and not card.diagram:
         log("card: diagram dropped by the validator: " + card.diagram_rejected.replace("\n", " | "))
     return card
 

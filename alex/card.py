@@ -36,7 +36,8 @@ Rules:
 - impact: High if the change touches money, auth, data integrity or the main user path; Low for docs, tests, small refactors.
 - score: 5 merge, 4 small fixes, 3 address feedback first, 2 needs rework, 0-1 rethink.
 - diagram: choose sequence for calls between services or APIs, er for schema changes, class for class hierarchies,
-  flowchart for control flow or business logic, none for trivial or docs-only changes.
+  flowchart for control flow or business logic. Use none ONLY when the PR changes nothing but docs, comments,
+  formatting, renames or dependency versions. Any PR with a finding or a behaviour change gets a diagram.
   Show the changed behaviour, and if a finding breaks the flow, show where it breaks.
   At most 12 nodes. Flowchart must start with "flowchart TD" and every label must be quoted, like A["Store message ID"].
   Sequence must start with "sequenceDiagram". No code fences, no styling, no comments.
@@ -57,6 +58,32 @@ class CardData:
     diagram: Optional[str] = None
     diagram_rejected: str = ""
     from_model: bool = False
+
+
+DIAGRAM_PROMPT = """You draw one Mermaid diagram for a pull request review. Reply with ONE JSON object:
+{"type": "flowchart" | "sequence" | "er" | "class", "mermaid": "diagram source"}
+Show the changed behaviour and where the most important finding breaks it. At most 12 nodes.
+Flowchart must start with "flowchart TD" and every label must be quoted, like A["Store message ID"].
+Sequence must start with "sequenceDiagram". No code fences, no styling, no comments, no em or en dashes."""
+
+
+def build_diagram_messages(title: str, diff_text: str, findings: List[Finding]) -> List[dict]:
+    clipped = diff_text[:20000]
+    items = [{"priority": f.priority, "location": f.location, "detail": f.content[:600]} for f in findings[:5]]
+    user = f"PR title: {title}\n\nFindings:\n{json.dumps(items, ensure_ascii=False)}\n\nDiff:\n{clipped}"
+    return [{"role": "system", "content": DIAGRAM_PROMPT}, {"role": "user", "content": user}]
+
+
+def apply_diagram(card: "CardData", raw: Optional[dict]) -> bool:
+    if not raw:
+        return False
+    kind = str(raw.get("type", "")).strip().lower()
+    cleaned = mermaid.validate(kind, str(raw.get("mermaid", "")))
+    if cleaned:
+        card.diagram_type, card.diagram = kind, cleaned
+        return True
+    card.diagram_rejected = f"{kind}: {str(raw.get('mermaid', ''))[:1500]}"
+    return False
 
 
 def build_messages(title: str, body: str, diff_text: str, findings: List[Finding]) -> List[dict]:
