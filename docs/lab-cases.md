@@ -19,4 +19,4 @@ For each case, lab `main` = mark.ai at the parent of the "introduced" commit, re
 
 | Case | Greptile | Alex (raw engine output) |
 |---|---|---|
-| 1 | Caught, line 267, P1, confidence 4/5 | Caught, line 267, critical, same fix, ~$0.01 |
+| 1 | Caught, line 267, P1, confidence 4/5 | Caught, line 267, P0, confidence 2/5, same fix, ~$0.015 (phase 1 action, see `docs/comparisons/phase-1.md`) |

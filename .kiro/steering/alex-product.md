@@ -20,8 +20,8 @@ one-click fixes, automatic and on-demand triggers, per-repo config, learning, an
 
 | Phase | Scope | Status |
 |---|---|---|
-| 1 | Triggers (open + `/alex`), summary card, inline comments, bot identity (optional app), safety gate, status check | in progress |
-| 2 | Review tiers, `.alex/` config, install on any repo, `/alex` questions, rerun lab cases 2-8 vs Greptile | planned |
+| 1 | Triggers (open + `/alex`), summary card, inline comments, safety gate, status check | done (lab PR #1, see docs/comparisons/phase-1.md) |
+| 2 | `@alexreview-ai` trigger + org + GitHub App identity, review tiers, `.alex/` config, install on any repo, questions, rerun lab cases 2-8 vs Greptile | planned |
 | 3 | Security scan, auto-approve, related-repo context, `files.json` docs | planned |
 | 4 | Learning from reactions/replies, analytics, CLI | planned |
 | 5 | TREX-lite (run tests), codebase index, hosted app (no workflow file) | optional |
@@ -32,7 +32,10 @@ Update this table whenever a phase starts or finishes.
 
 - The engine that finds bugs is Alibaba's open-code-review CLI. Users never see that name; reviews are signed "Alex".
 - Model: Fireworks `accounts/fireworks/models/deepseek-v4p1-flash` for review and card. Judge for benchmarks: `glm-5p3-flash`.
-- Command prefix is `/alex`, not `@alex`: `@alex` would notify a real GitHub user named alex.
+- Phase 1 trigger is `/alex` and the bot posts as `github-actions[bot]`. Never use `@alex`: it notifies a real GitHub user named alex.
+- Phase 2 (decided): switch to `@alexreview-ai` like Greptile's `@greptileai`. The user creates a free GitHub
+  organization `alexreview-ai` to reserve the name (free as of Oct 2026) and a GitHub App of the same name, so
+  comments come from `alexreview-ai[bot]`. Keep `/alex` as an alias, ignore comments from bots, update footer and docs.
 - Alex only reads PR code, never runs it. Only OWNER/MEMBER/COLLABORATOR can trigger it.
 - Greptile's free Starter plan covers unlimited repos (50 credits/month, 1 developer). We used it for comparison.
 

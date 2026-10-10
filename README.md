@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img alt="status" src="https://img.shields.io/badge/status-MVP%20phase%201-22d3ee?style=flat-square">
+  <img alt="status" src="https://img.shields.io/badge/status-MVP%20phase%201%20done-34d399?style=flat-square">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-34d399?style=flat-square">
   <img alt="python" src="https://img.shields.io/badge/python-3.10%2B%20stdlib%20only-0b1220?style=flat-square">
   <img alt="github action" src="https://img.shields.io/badge/GitHub-Action-0b1220?style=flat-square&logo=github">
@@ -88,8 +88,8 @@ Alex is built phase by phase, and each phase is compared side by side with Grept
 
 | Phase | Scope | |
 |---|---|---|
-| **1** | Triggers, summary card, inline comments, bot identity, safety gate, status check | 🔨 in progress |
-| **2** | Review tiers (base, plus, apex), `.alex/` config, install anywhere, `/alex` questions | planned |
+| **1** | Triggers, summary card, inline comments, safety gate, status check | ✅ done ([comparison](docs/comparisons/phase-1.md)) |
+| **2** | `@alexreview-ai` bot identity, review tiers (base, plus, apex), `.alex/` config, install anywhere, questions | planned |
 | **3** | Security scan, auto-approve, related-repo context | planned |
 | **4** | Learning from reactions and replies, analytics, CLI | planned |
 | **5** | Run tests in a sandbox, codebase index, hosted app | optional |
