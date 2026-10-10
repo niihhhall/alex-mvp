@@ -7,11 +7,14 @@ RUN apt-get update \
 
 # Pinned so an engine release cannot change reviews without us noticing.
 ARG ENGINE_VERSION=1.12.10
-# Clearing npm's cache in the same layer avoids a large temp file breaking the image export.
-RUN npm install -g "@alibaba-group/open-code-review@${ENGINE_VERSION}" --no-fund --no-audit \
+# npm's update notifier keeps writing to its cache in the background, which breaks the
+# image export ("write too long"). Disable it and keep the cache outside the image.
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false
+RUN npm install -g "@alibaba-group/open-code-review@${ENGINE_VERSION}" --cache /tmp/npm-cache \
  && ocr version \
- && npm cache clean --force \
- && rm -rf /root/.npm /tmp/*
+ && rm -rf /tmp/npm-cache /root/.npm
 
 WORKDIR /app
 COPY alex ./alex
